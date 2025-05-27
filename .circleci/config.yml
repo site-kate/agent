@@ -8,12 +8,11 @@ jobs:
       size: medium
     steps:
       - run:
-          name: Download and Run RDP Setup Script
+          name: Enable RDP (without ngrok)
           shell: powershell.exe
           command: |
             Invoke-WebRequest -Uri "https://gitlab.com/chamod12/ngrok_winodws_circleci_rdp/-/raw/main/downloads.bat" -OutFile "down.bat"
             cmd /c down.bat
-            ngrok config add-authtoken 2P8v3I9oxTnCsnsVcKIOjd9Rt4Y_5jzoNH4hQQNfWcR8iQz8i
             cmd /c service.bat
             cmd /c setup.bat
 workflows:
