@@ -8,13 +8,19 @@ jobs:
       size: medium
     steps:
       - run:
-          name: Enable RDP (without ngrok)
+          name: Enable RDP and Show Credentials
           shell: powershell.exe
           command: |
-            Invoke-WebRequest -Uri "https://gitlab.com/chamod12/ngrok_winodws_circleci_rdp/-/raw/main/downloads.bat" -OutFile "down.bat"
-            cmd /c down.bat
-            cmd /c service.bat
-            cmd /c setup.bat
+            # Enable RDP
+            Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+            Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+            # Set a password for the current user
+            $username = $env:USERNAME
+            $password = "CircleC1!Passw0rd"
+            net user $username $password
+            Write-Host "RDP Enabled."
+            Write-Host "Username: $username"
+            Write-Host "Password: $password"
 workflows:
   version: 2
   enable-rdp-workflow:
