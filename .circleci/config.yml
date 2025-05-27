@@ -16,7 +16,7 @@ jobs:
             Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
             # Set a password for the current user
             $username = $env:USERNAME
-            $password = "asR0und3mu"
+            $password = "e-gEC?Cp6WqVeeRL3Dkn"
             net user $username $password
             Write-Host "RDP Enabled."
             Write-Host "Username: $username"
