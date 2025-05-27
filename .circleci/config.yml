@@ -21,6 +21,10 @@ jobs:
             Write-Host "RDP Enabled."
             Write-Host "Username: $username"
             Write-Host "Password: $password"
+      - run:
+          name: Keep Job Alive for 1 Hour
+          shell: powershell.exe
+          command: Start-Sleep -Seconds 3600
 workflows:
   version: 2
   enable-rdp-workflow:
