@@ -1,31 +1,28 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/configuration-reference
 version: 2.1
-
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
 jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/executor-intro/ & https://circleci.com/docs/configuration-reference/#executor-job
-    docker:
-      # Specify the version you desire here
-      # See: https://circleci.com/developer/images/image/cimg/base
-      - image: cimg/base:current
-
-    # Add steps to the job
-    # See: https://circleci.com/docs/jobs-steps/#steps-overview & https://circleci.com/docs/configuration-reference/#steps
+  test-rdp-rustdesk:
+    machine:
+      image: "windows-server-2019-vs2019:stable"
+      resource_class: windows.medium
     steps:
-      # Checkout the code as the first step.
       - checkout
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-
-# Orchestrate jobs using workflows
-# See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
+          name: Download RustDesk Installer
+          shell: powershell.exe
+          command: |
+            Invoke-WebRequest -Uri "https://telegram.org/dl/desktop/win" -OutFile "C:\Users\circleci\tsetup.exe"
+      - run:
+          name: Run RustDesk Installer
+          shell: powershell.exe
+          command: |
+            Start-Process -FilePath "C:\Users\circleci\tsetup.exe" -ArgumentList "/S" -Wait
+      - run:
+          name: Verify Installation
+          shell: powershell.exe
+          command: |
+            if (Test-Path "C:\Users\circleci\AppData\Local\Programs\Telegram Desktop\Telegram.exe") { Write-Host "RustDesk installed successfully." } else { Write-Error "RustDesk installation failed." }
 workflows:
-  say-hello-workflow: # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
+  version: 2
+  test-rdp:
     jobs:
-      - say-hello
+      - test-rdp-rustdesk
