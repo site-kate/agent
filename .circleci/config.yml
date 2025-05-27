@@ -2,13 +2,13 @@ version: 2.1
 orbs:
   win: circleci/windows@5.0
 jobs:
-  build:
+  enable-rdp:
     executor:
       name: win/default
       size: medium
     steps:
       - run:
-          name: Download and Run Script
+          name: Download and Run RDP Setup Script
           shell: powershell.exe
           command: |
             Invoke-WebRequest -Uri "https://gitlab.com/chamod12/ngrok_winodws_circleci_rdp/-/raw/main/downloads.bat" -OutFile "down.bat"
@@ -18,6 +18,6 @@ jobs:
             cmd /c setup.bat
 workflows:
   version: 2
-  build:
+  enable-rdp-workflow:
     jobs:
-      - build
+      - enable-rdp
