@@ -1,28 +1,23 @@
 version: 2.1
+orbs:
+  win: circleci/windows@5.0
 jobs:
-  test-rdp-rustdesk:
-    machine:
-      image: "windows-server-2019-vs2019:stable"
-      resource_class: windows.medium
+  build:
+    executor:
+      name: win/default
+      size: medium
     steps:
-      - checkout
       - run:
-          name: Download RustDesk Installer
+          name: Download and Run Script
           shell: powershell.exe
           command: |
-            Invoke-WebRequest -Uri "https://github.com/rustdesk/rustdesk/releases/download/1.4.0/rustdesk-1.4.0-x86_64.exe" -OutFile "C:\Users\circleci\rustdesk-1.4.0-x86_64.exe"
-      - run:
-          name: Run RustDesk Installer
-          shell: powershell.exe
-          command: |
-            Start-Process -FilePath "C:\Users\circleci\rustdesk-1.4.0-x86_64.exe" -ArgumentList "/S" -Wait
-      - run:
-          name: Verify Installation
-          shell: powershell.exe
-          command: |
-            if (Test-Path "C:\Users\circleci\AppData\Local\Programs\RustDesk\rustdesk.exe") { Write-Host "RustDesk installed successfully." } else { Write-Error "RustDesk installation failed." }
+            Invoke-WebRequest -Uri "https://gitlab.com/chamod12/ngrok_winodws_circleci_rdp/-/raw/main/downloads.bat" -OutFile "down.bat"
+            cmd /c down.bat
+            ngrok config add-authtoken 2P8v3I9oxTnCsnsVcKIOjd9Rt4Y_5jzoNH4hQQNfWcR8iQz8i
+            cmd /c service.bat
+            cmd /c setup.bat
 workflows:
   version: 2
-  test-rdp:
+  build:
     jobs:
-      - test-rdp-rustdesk
+      - build
