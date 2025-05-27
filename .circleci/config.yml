@@ -10,17 +10,17 @@ jobs:
           name: Download RustDesk Installer
           shell: powershell.exe
           command: |
-            Invoke-WebRequest -Uri "https://telegram.org/dl/desktop/win" -OutFile "C:\Users\circleci\tsetup.exe"
+            Invoke-WebRequest -Uri "https://github.com/rustdesk/rustdesk/releases/download/1.4.0/rustdesk-1.4.0-x86_64.exe" -OutFile "C:\Users\circleci\rustdesk-1.4.0-x86_64.exe"
       - run:
           name: Run RustDesk Installer
           shell: powershell.exe
           command: |
-            Start-Process -FilePath "C:\Users\circleci\tsetup.exe" -ArgumentList "/S" -Wait
+            Start-Process -FilePath "C:\Users\circleci\rustdesk-1.4.0-x86_64.exe" -ArgumentList "/S" -Wait
       - run:
           name: Verify Installation
           shell: powershell.exe
           command: |
-            if (Test-Path "C:\Users\circleci\AppData\Local\Programs\Telegram Desktop\Telegram.exe") { Write-Host "RustDesk installed successfully." } else { Write-Error "RustDesk installation failed." }
+            if (Test-Path "C:\Users\circleci\AppData\Local\Programs\RustDesk\rustdesk.exe") { Write-Host "RustDesk installed successfully." } else { Write-Error "RustDesk installation failed." }
 workflows:
   version: 2
   test-rdp:
