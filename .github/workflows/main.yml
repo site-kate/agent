@@ -1,0 +1,43 @@
+name: RustDesk Install and Screenshot
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rustdesk_screenshot:
+    runs-on: windows-latest
+
+    steps:
+      - name: Download RustDesk Installer
+        run: |
+          curl -L -o rustdesk.exe https://github.com/rustdesk/rustdesk/releases/download/1.4.0/rustdesk-1.4.0-x86_64.exe
+
+      - name: Install RustDesk
+        run: |
+          Start-Process -FilePath "$PWD\rustdesk.exe" -Wait
+
+      - name: Start RustDesk
+        run: |
+          Start-Process -FilePath "$PWD\rustdesk.exe"
+          Start-Sleep -Seconds 10
+
+      - name: Take Screenshot
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms
+          Add-Type -AssemblyName System.Drawing
+          $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          $bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+          $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+          $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
+          $screenshotPath = "$env:GITHUB_WORKSPACE\rustdesk_screenshot.png"
+          $bitmap.Save($screenshotPath, [System.Drawing.Imaging.ImageFormat]::Png)
+          $graphics.Dispose()
+          $bitmap.Dispose()
+          Write-Host "Screenshot saved to $screenshotPath"
+
+      - name: Upload Screenshot to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rustdesk-screenshot
+          path: rustdesk_screenshot.png
