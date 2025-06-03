@@ -6,7 +6,7 @@ on:
 jobs:
   screenshot:
     runs-on: windows-latest
-    timeout-minutes: 240  # Keep runner alive for 4 hours
+    timeout-minutes: 240
 
     steps:
       - name: Checkout repository
@@ -17,11 +17,30 @@ jobs:
         run: |
           Invoke-WebRequest -Uri "https://github.com/rustdesk/rustdesk/releases/download/1.4.0/rustdesk-1.4.0-x86_64.exe" -OutFile "$env:GITHUB_WORKSPACE\rustdesk.exe"
 
-      - name: Start RustDesk with password
+      - name: Start RustDesk to generate config
         shell: pwsh
         run: |
-          Start-Process -FilePath "$env:GITHUB_WORKSPACE\rustdesk.exe" -ArgumentList "--password", "R0und3mu"
-          Start-Sleep -Seconds 10  # Give RustDesk a moment to start
+          Start-Process -FilePath "$env:GITHUB_WORKSPACE\rustdesk.exe"
+          Start-Sleep -Seconds 10
+          Get-Process rustdesk | Stop-Process
+
+      - name: Set RustDesk password in config
+        shell: pwsh
+        run: |
+          $settingsPath = "$env:APPDATA\RustDesk\settings.json"
+          if (Test-Path $settingsPath) {
+            $json = Get-Content $settingsPath | ConvertFrom-Json
+          } else {
+            $json = @{}
+          }
+          $json.password = "R0und3mu"
+          $json | ConvertTo-Json -Compress | Set-Content $settingsPath -Encoding UTF8
+
+      - name: Start RustDesk with updated config
+        shell: pwsh
+        run: |
+          Start-Process -FilePath "$env:GITHUB_WORKSPACE\rustdesk.exe"
+          Start-Sleep -Seconds 10
 
       - name: Take Screenshot via PowerShell
         shell: pwsh
@@ -46,4 +65,4 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Keeping the runner alive for 4 hours..."
-          Start-Sleep -Seconds 14400  # 4 hours
+          Start-Sleep -Seconds 14400
