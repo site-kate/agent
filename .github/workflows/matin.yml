@@ -1,4 +1,4 @@
-name: Windows Runner Screenshot
+name: Windows Runner Screenshot with RustDesk
 
 on:
   workflow_dispatch:
@@ -6,11 +6,22 @@ on:
 jobs:
   screenshot:
     runs-on: windows-latest
-    timeout-minutes: 240  # 4 hours
+    timeout-minutes: 240  # Keep runner alive for 4 hours
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Download RustDesk
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/rustdesk/rustdesk/releases/download/1.4.0/rustdesk-1.4.0-x86_64.exe" -OutFile "$env:GITHUB_WORKSPACE\rustdesk.exe"
+
+      - name: Start RustDesk
+        shell: pwsh
+        run: |
+          Start-Process -FilePath "$env:GITHUB_WORKSPACE\rustdesk.exe"
+          Start-Sleep -Seconds 10  # Give RustDesk a moment to start
 
       - name: Take Screenshot via PowerShell
         shell: pwsh
