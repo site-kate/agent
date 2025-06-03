@@ -6,23 +6,24 @@ on:
 jobs:
   screenshot:
     runs-on: windows-latest
-    timeout-minutes: 240  # Keep runner alive for 4 hours
+    timeout-minutes: 240  # 4 hours
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install PowerShell Module for Screenshot
+      - name: Take Screenshot via PowerShell
         shell: pwsh
         run: |
-          Install-Module -Name ImageTools -Force -Scope CurrentUser
-
-      - name: Take Screenshot
-        shell: pwsh
-        run: |
-          Import-Module ImageTools
-          $path = "$env:GITHUB_WORKSPACE\screenshot.png"
-          Save-Screenshot -Path $path
+          Add-Type -AssemblyName System.Windows.Forms
+          Add-Type -AssemblyName System.Drawing
+          $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          $bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+          $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+          $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
+          $bitmap.Save("$env:GITHUB_WORKSPACE\screenshot.png", [System.Drawing.Imaging.ImageFormat]::Png)
+          $graphics.Dispose()
+          $bitmap.Dispose()
 
       - name: Upload Screenshot Artifact
         uses: actions/upload-artifact@v4
